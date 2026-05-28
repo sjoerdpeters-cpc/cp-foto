@@ -8,6 +8,7 @@ dist/
 album/
 album-manifest.json
 pricing.json
+package-lock.json
 
 .vercel
 .claude/

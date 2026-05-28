@@ -1,0 +1,17 @@
+# CP Sportfotografie — Actiecodes
+# Formaat: [CODE] = waarde
+# Waarde: percentage (bijv. 10%) of vast bedrag (bijv. 5EUR)
+# Codes zijn hoofdletter-onafhankelijk bij invoer
+
+# Welkomstkorting
+[WELKOM10] = 10%
+
+# Teamkortingen — deel met teammanager
+[HOCKEY25] = 25%
+[VOETBAL15] = 15%
+
+# Seizoenacties
+[ZOMER2026] = 5EUR
+
+# Gratis (100% korting) — voor testdoeleinden of speciale gevallen
+# [GRATIS] = 100%

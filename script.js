@@ -18,6 +18,7 @@ const state = {
   },
   cart: JSON.parse(localStorage.getItem("cp-cart") || "[]"),
   contactForm: { naam: "", email: "", telefoon: "", bericht: "", sent: false },
+  promo: { code: "", discount: 0, finalAmount: null, valid: null, message: "", loading: false },
 };
 
 let EVENTS = [
@@ -92,6 +93,15 @@ function applyHash() {
   if (window.CP_ALBUM_SLUG) return; // per-album page — loadAlbums already handled it
   const raw = window.location.hash.slice(1);
   if (!raw) return;
+
+  // Mollie betaal-redirect: #betaald
+  if (raw === "betaald") {
+    state.screen = "checkout";
+    state.checkoutStep = "done";
+    history.replaceState(null, "", "#checkout");
+    return;
+  }
+
   const [screen, param] = raw.split("/");
   const valid = ["home", "events", "gallery", "detail", "checkout", "organizers", "contact", "privacy"];
   if (!valid.includes(screen)) return;
@@ -218,6 +228,11 @@ function cartTotal() {
   return count * prijs;
 }
 
+function cartTotalAfterPromo() {
+  if (state.promo.valid && state.promo.finalAmount !== null) return parseFloat(state.promo.finalAmount);
+  return cartTotal();
+}
+
 function priceLabel(count = cartPhotos().length) {
   const { korting_3, korting_5 } = PRICING.foto;
   if (count >= 5) return `${count} foto's · 5+ deal (${euro(korting_5)})`;
@@ -280,7 +295,7 @@ function reportMailto(photo) {
   const body = encodeURIComponent(
     `Beste CP-sportfotografie,\n\nIk wil verzoeken om de volgende foto offline te halen:\n\nFoto-ID: ${photo.id}\nStartnummer: #${photo.bib}\nAlbum: ${album?.title || "onbekend"}\n\nMijn naam:\nMijn reden:\n\nMet vriendelijke groet,`
   );
-  return `mailto:info@cp-sportfotografie.nl?subject=${subject}&body=${body}`;
+  return `mailto:sportfotografie@cp-consult.nl?subject=${subject}&body=${body}`;
 }
 
 function photoCard(photo, showMeta = true) {
@@ -593,28 +608,37 @@ function checkoutHtml() {
             <section class="card checkout-card">
               <div class="checkout-step-head">
                 <span class="eyebrow">Stap 03</span>
-                <h2 class="display">Betalen.</h2>
+                <h2 class="display">Actiecode.</h2>
               </div>
-              <div class="payment-grid">
-                ${[
-                  ["ideal", "iDEAL", "Nederlandse banken"],
-                  ["tikkie", "Tikkie", "Betaalverzoek"],
-                  ["apple-pay", "Apple Pay", "Snel op mobiel"],
-                  ["card", "Creditcard", "Visa · Mastercard"],
-                ].map(([id, label, hint]) => `
-                  <label class="payment-option ${state.checkout.payment === id ? "active" : ""}">
-                    <input type="radio" name="payment" value="${id}" ${state.checkout.payment === id ? "checked" : ""} data-payment />
-                    <strong>${label}</strong>
-                    <span>${hint}</span>
-                  </label>
-                `).join("")}
+              <div class="promo-row">
+                <div class="field promo-field">
+                  <input id="promo-input" placeholder="Actiecode (optioneel)" value="${escapeHtml(state.promo.code)}" data-promo-input autocomplete="off" autocapitalize="characters" />
+                </div>
+                <button class="btn dark promo-apply-btn" data-apply-promo ${state.promo.loading ? "disabled" : ""}>${state.promo.loading ? "…" : "Toepassen"}</button>
+              </div>
+              ${state.promo.valid === true ? `<p class="promo-feedback promo-ok">${icon("check")} ${escapeHtml(state.promo.message)} — je betaalt ${euro(cartTotalAfterPromo())}</p>` : ""}
+              ${state.promo.valid === false ? `<p class="promo-feedback promo-err">Ongeldige actiecode. Probeer het opnieuw.</p>` : ""}
+            </section>
+            <section class="card checkout-card">
+              <div class="checkout-step-head">
+                <span class="eyebrow">Stap 04</span>
+                <h2 class="display">Betalen.</h2>
               </div>
               <label class="terms-row">
                 <input type="checkbox" data-checkout-terms ${state.checkout.terms ? "checked" : ""} />
                 <span>Ik ga akkoord met levering van digitale downloads direct na betaling.</span>
               </label>
-              <button class="btn primary lg" data-place-order style="width:100%;margin-top:18px">Betaal ${euro(cartTotal())} →</button>
-              <p class="checkout-note">Deze knop simuleert nu de betaling. Later koppelen we hier Mollie of Stripe aan.</p>
+              ${state.promo.valid && parseFloat(state.promo.finalAmount) < cartTotal() ? `
+                <div class="promo-totaal">
+                  <span class="mono" style="font-size:12px;color:var(--cp-mute);text-decoration:line-through">${euro(cartTotal())}</span>
+                  <span class="num" style="font-size:22px;color:var(--cp-red)">${euro(cartTotalAfterPromo())}</span>
+                  <span class="mono" style="font-size:11px;color:var(--cp-red)">na korting</span>
+                </div>
+              ` : ""}
+              <button class="btn primary lg" data-place-order style="width:100%;margin-top:18px" ${state.promo.loading ? "disabled" : ""}>
+                Betaal via iDEAL ${euro(cartTotalAfterPromo())} →
+              </button>
+              <p class="checkout-note">Je wordt doorgestuurd naar Mollie voor een veilige betaling via iDEAL. Na betaling ontvang je een downloadlink op ${escapeHtml(state.checkout.email || "je e-mailadres")}.</p>
             </section>
           </div>
           ${checkoutSummaryHtml(items)}
@@ -641,8 +665,8 @@ function checkoutDoneHtml() {
       <section class="section">
         <div class="checkout-done card">
           <div class="eyebrow">Bestelling geplaatst</div>
-          <h1 class="display">Downloadlink onderweg.</h1>
-          <p>We sturen de hoge-res downloads naar ${escapeHtml(state.checkout.email || "je e-mailadres")}. In de echte checkout wordt dit gekoppeld aan de betaalprovider en downloadbackend.</p>
+          <h1 class="display">Betaling ontvangen.</h1>
+          <p>We sturen de hoge-res downloads naar <strong>${escapeHtml(state.checkout.email || "je e-mailadres")}</strong> zodra de betaling bevestigd is. Controleer ook je spam.</p>
           <div class="checkout-actions">
             <button class="btn dark lg" data-nav="events">Meer evenementen</button>
             <button class="btn ghost lg" data-reset-checkout>Nieuwe bestelling</button>
@@ -769,7 +793,7 @@ function contactHtml() {
               <div class="eyebrow" style="margin-bottom:18px">Direct contact</div>
               <div class="contact-info-row">
                 <span class="mono" style="font-size:11px;letter-spacing:.14em;color:var(--cp-mute)">E-MAIL</span>
-                <a href="mailto:info@cp-sportfotografie.nl" style="color:var(--cp-navy);font-weight:700;text-decoration:none">info@cp-sportfotografie.nl</a>
+                <a href="mailto:sportfotografie@cp-consult.nl" style="color:var(--cp-navy);font-weight:700;text-decoration:none">sportfotografie@cp-consult.nl</a>
               </div>
               <div class="contact-info-row">
                 <span class="mono" style="font-size:11px;letter-spacing:.14em;color:var(--cp-mute)">GEBASEERD IN</span>
@@ -838,10 +862,10 @@ function privacyHtml() {
 
           <div class="privacy-block">
             <h2 class="display" style="font-size:28px;color:var(--cp-navy)">Contact &amp; vragen</h2>
-            <p>Heb je vragen over hoe we omgaan met jouw gegevens, of wil je een foto laten verwijderen? Neem dan contact op via <a href="mailto:info@cp-sportfotografie.nl" style="color:var(--cp-red);font-weight:700">info@cp-sportfotografie.nl</a> of via het contactformulier.</p>
+            <p>Heb je vragen over hoe we omgaan met jouw gegevens, of wil je een foto laten verwijderen? Neem dan contact op via <a href="mailto:sportfotografie@cp-consult.nl" style="color:var(--cp-red);font-weight:700">sportfotografie@cp-consult.nl</a> of via het contactformulier.</p>
             <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
               <button class="btn primary" data-nav="contact">Contactformulier →</button>
-              <a class="btn ghost" href="mailto:info@cp-sportfotografie.nl">Stuur direct een e-mail</a>
+              <a class="btn ghost" href="mailto:sportfotografie@cp-consult.nl">Stuur direct een e-mail</a>
             </div>
           </div>
 
@@ -929,23 +953,78 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const applyPromoButton = event.target.closest("[data-apply-promo]");
+  if (applyPromoButton) {
+    event.preventDefault();
+    const code = (document.getElementById("promo-input")?.value || "").trim();
+    state.promo.code = code;
+    if (!code) { state.promo.valid = null; state.promo.message = ""; render(); return; }
+    state.promo.loading = true;
+    render();
+    fetch("/api/validate-promo", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code, amount: cartTotal() }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        state.promo.loading = false;
+        state.promo.valid = data.valid;
+        state.promo.message = data.message || "";
+        state.promo.discount = data.valid ? parseFloat(data.discount) : 0;
+        state.promo.finalAmount = data.valid ? data.finalAmount : null;
+        render();
+      })
+      .catch(() => {
+        state.promo.loading = false;
+        state.promo.valid = false;
+        state.promo.message = "Kon code niet controleren. Probeer het opnieuw.";
+        render();
+      });
+    return;
+  }
+
   const placeOrderButton = event.target.closest("[data-place-order]");
   if (placeOrderButton) {
     event.preventDefault();
-    // Remove any stacked error messages first
     document.querySelectorAll(".checkout-error").forEach((el) => el.remove());
-    if (!cartPhotos().length) {
-      nav("events");
-      return;
-    }
+    if (!cartPhotos().length) { nav("events"); return; }
     if (!state.checkout.email || !state.checkout.terms) {
       placeOrderButton.insertAdjacentHTML("afterend", '<p class="checkout-error">Vul je e-mail in en accepteer de digitale levering.</p>');
       return;
     }
-    setCart([]);
-    state.checkoutStep = "done";
-    render();
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    placeOrderButton.disabled = true;
+    placeOrderButton.textContent = "Even geduld…";
+    const photos = cartPhotos().map((p) => ({ id: p.id, src: p.src, price: p.price }));
+    fetch("/api/checkout", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        amount: cartTotalAfterPromo(),
+        customerName: state.checkout.name,
+        customerEmail: state.checkout.email,
+        photos,
+        promoCode: state.promo.valid ? state.promo.code : null,
+      }),
+    })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.error) throw new Error(data.error);
+        setCart([]);
+        state.promo = { code: "", discount: 0, finalAmount: null, valid: null, message: "", loading: false };
+        if (data.free) {
+          state.checkoutStep = "done";
+          render();
+          window.scrollTo({ top: 0, behavior: "smooth" });
+        } else {
+          window.location.href = data.checkoutUrl;
+        }
+      })
+      .catch((err) => {
+        placeOrderButton.disabled = false;
+        placeOrderButton.textContent = `Betaal via iDEAL ${euro(cartTotalAfterPromo())} →`;
+        placeOrderButton.insertAdjacentHTML("afterend", `<p class="checkout-error">${escapeHtml(err.message || "Er ging iets mis. Probeer het opnieuw.")}</p>`);
+      });
     return;
   }
 
@@ -1049,6 +1128,18 @@ document.addEventListener("input", (event) => {
   if (event.target.matches("[data-checkout-field]")) {
     state.checkout[event.target.dataset.checkoutField] = event.target.value;
     document.querySelectorAll(".checkout-error").forEach((el) => el.remove());
+    return;
+  }
+
+  if (event.target.matches("[data-promo-input]")) {
+    state.promo.code = event.target.value;
+    // Reset validatiestatus als de gebruiker de code wijzigt
+    if (state.promo.valid !== null) {
+      state.promo.valid = null;
+      state.promo.message = "";
+      state.promo.discount = 0;
+      state.promo.finalAmount = null;
+    }
     return;
   }
 

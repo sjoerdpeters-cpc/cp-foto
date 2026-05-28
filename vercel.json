@@ -1,4 +1,5 @@
 {
+  "installCommand": "npm install",
   "buildCommand": "node scripts/generate-albums.js",
   "outputDirectory": ".",
   "cleanUrls": true,
