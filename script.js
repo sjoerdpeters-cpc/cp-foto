@@ -357,7 +357,7 @@ function homeHtml() {
       </section>
       <section class="quote-section">
         <div class="display quote-mark">"</div>
-        <div><div class="eyebrow">Manifest</div><p class="display">Geen foto.<br /><span style="color:var(--cp-red)">Geen bewijs.</span><br />Geen herinnering.</p><p class="body">Ik fotografeer sport zoals ik 'm zelf beleef: vol gas, lage hoek, oog voor de seconde dat het ertoe doet. Een klik, jouw moment, geen herinnering.</p><button class="btn dark lg" style="margin-top:28px">Mijn verhaal →</button></div>
+        <div><div class="eyebrow">Manifest</div><p class="display">Geen foto.<br /><span style="color:var(--cp-red)">Geen bewijs.</span><br />Geen herinnering.</p><p class="body">Ik fotografeer sport zoals ik 'm zelf beleef: vol gas, lage hoek, oog voor de seconde dat het ertoe doet. Een klik, jouw moment, geen herinnering.</p></div>
       </section>
     </main>
     ${footerHtml()}

@@ -1421,11 +1421,13 @@ button {
 
 .footer-slim {
   padding: 28px 48px 20px;
+  text-align: center;
 }
 
 .footer-links {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 28px;
   flex-wrap: wrap;
   margin-bottom: 18px;
