@@ -6,6 +6,7 @@ const state = {
   sport: "alle",
   bib: "",
   eventSearch: "",
+  hashtag: "",
   detailId: "cp-102",
   checkoutStep: "details",
   menuOpen: false,
@@ -163,6 +164,7 @@ function albumToEvent(album) {
     region: album.region || album.location || "",
     img: album.cover || "Logo/cp_sportfotografie_variant5_volledige_presentatie.png",
     sortDate: album.sortDate || "",
+    hashtags: album.hashtags || [],
   };
 }
 
@@ -383,9 +385,13 @@ function eventsHtml() {
   const filtered = EVENTS.filter((e) => {
     const sportMatch = state.sport === "alle" || e.sport.toLowerCase() === state.sport;
     const searchMatch = !q || e.name.toLowerCase().includes(q) || (e.region || "").toLowerCase().includes(q) || (e.dist || "").toLowerCase().includes(q);
-    return sportMatch && searchMatch;
+    const hashtagMatch = !state.hashtag || (e.hashtags || []).some((h) => h.toLowerCase() === state.hashtag.toLowerCase());
+    return sportMatch && searchMatch && hashtagMatch;
   });
   const sports = availableSports();
+  const activeHashtagChip = state.hashtag
+    ? `<button class="chip active hashtag-chip-active" data-clear-hashtag>${escapeHtml(state.hashtag)} ×</button>`
+    : "";
   return `
     ${navHtml("events")}
     <main>
@@ -396,15 +402,21 @@ function eventsHtml() {
         </div>
         <div class="chip-row">
           ${sports.map((s) => `<button class="chip ${state.sport === s ? "active" : ""}" data-sport="${s}">${s === "alle" ? "Alle sporten" : s[0].toUpperCase() + s.slice(1)}</button>`).join("")}
+          ${activeHashtagChip}
           <span style="flex:1"></span><span class="mono" style="font-size:12px;color:var(--cp-mute)">${filtered.length} EVENEMENTEN · GESORTEERD OP DATUM</span>
         </div>
       </section>
       <section class="section">
-        ${filtered.length ? `<div class="event-list">${filtered.map(eventRow).join("")}</div>` : `<p style="color:var(--cp-mute);font-size:15px">Geen evenementen gevonden voor "<strong>${escapeHtml(state.eventSearch)}</strong>".</p>`}
+        ${filtered.length ? `<div class="event-list">${filtered.map(eventRow).join("")}</div>` : `<p style="color:var(--cp-mute);font-size:15px">Geen evenementen gevonden${state.hashtag ? ` voor <strong>${escapeHtml(state.hashtag)}</strong>` : state.eventSearch ? ` voor "<strong>${escapeHtml(state.eventSearch)}</strong>"` : ""}.</p>`}
       </section>
     </main>
     ${footerHtml()}
   `;
+}
+
+function hashtagsHtml(tags) {
+  if (!tags || !tags.length) return "";
+  return `<div class="hashtag-row">${tags.map((t) => `<button class="hashtag-chip ${state.hashtag === t ? "active" : ""}" data-hashtag="${escapeHtml(t)}">${escapeHtml(t)}</button>`).join("")}</div>`;
 }
 
 function eventRow(e) {
@@ -413,7 +425,7 @@ function eventRow(e) {
     <article class="card card-hover event-row" ${e.albumId ? `data-album="${e.albumId}"` : 'data-nav="gallery"'}>
       <div class="date-block"><div class="mono" style="font-size:11px;letter-spacing:.16em;opacity:.65">${e.year}</div><div class="display" style="font-size:56px;margin-top:4px">${day}</div><div class="display" style="font-size:22px;margin-top:4px;color:var(--cp-red)">${month}</div>${e.live ? '<span class="live" style="position:absolute;top:10px;right:10px;color:white">LIVE</span>' : ""}</div>
       <div class="event-row-cover"><img src="${e.img}" alt="${e.name}" loading="lazy" /></div>
-      <div class="event-row-meta"><div><span class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cp-red);font-weight:800">${e.sport}</span><span style="display:inline-block;width:3px;height:3px;border-radius:99px;background:var(--cp-line);margin:0 8px 2px"></span><span class="mono" style="font-size:11px;color:var(--cp-mute)">${e.region}</span></div><div class="display" style="font-size:32px;color:var(--cp-navy)">${e.name}</div><div class="mono" style="font-size:12px;color:var(--cp-mute)">${e.dist}</div></div>
+      <div class="event-row-meta"><div><span class="mono" style="font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--cp-red);font-weight:800">${e.sport}</span><span style="display:inline-block;width:3px;height:3px;border-radius:99px;background:var(--cp-line);margin:0 8px 2px"></span><span class="mono" style="font-size:11px;color:var(--cp-mute)">${e.region}</span></div><div class="display" style="font-size:32px;color:var(--cp-navy)">${e.name}</div><div class="mono" style="font-size:12px;color:var(--cp-mute)">${e.dist}</div>${hashtagsHtml(e.hashtags)}</div>
       <div class="event-row-cta"><div style="text-align:right"><div class="num" style="font-size:40px;color:var(--cp-navy)">${e.photos.toLocaleString("nl-NL")}</div><div class="mono" style="font-size:11px;letter-spacing:.14em;color:var(--cp-mute);text-transform:uppercase">foto's</div></div><button class="btn primary">Bekijk →</button></div>
     </article>
   `;
@@ -442,6 +454,7 @@ function galleryHtml() {
         <img src="${cover}" alt="${title}" />
         <div class="banner-content"><div class="mono" style="font-size:11px;letter-spacing:.14em;opacity:.8">← EVENEMENTEN / ${album?.sport?.toUpperCase() || "HARDLOPEN"}</div><h1 class="display">${firstTitleWord} <span style="color:var(--cp-zest)">${secondTitlePart || location}</span></h1><div class="mono" style="display:flex;align-items:center;gap:12px;font-size:12px;letter-spacing:.1em">${date} <span>·</span> ${photos.length.toLocaleString("nl-NL")} FOTO'S <span>·</span> <span class="live">${album?.live ? "live upload" : location}</span></div></div>
       </section>
+      ${album?.hashtags?.length ? `<section class="hashtag-bar">${album.hashtags.map((t) => `<button class="hashtag-chip" data-hashtag="${escapeHtml(t)}" data-nav="events">${escapeHtml(t)}</button>`).join("")}</section>` : ""}
       <section class="filter-bar">
         <label class="field bib" style="min-width:220px"><span class="pre" style="color:var(--cp-red)">#</span><input id="gallery-bib" value="${state.bib}" placeholder="startnummer" inputmode="numeric" maxlength="5" /></label>
         <span style="flex:1"></span><span class="mono" style="font-size:12px;color:var(--cp-mute)">${photos.length} / ${albumPhotos().length} foto's</span><button class="chip">Sorteer: nieuwste ↓</button>
@@ -970,6 +983,22 @@ document.addEventListener("click", (event) => {
   if (pkgButton && event.target.closest("[data-nav='contact']")) {
     const pkg = packages().find((p) => p.id === pkgButton.dataset.pkg);
     if (pkg) state.contactForm.bericht = `Ik heb interesse in het ${pkg.naam} (€${pkg.prijs}). `;
+  }
+
+  const hashtagButton = event.target.closest("[data-hashtag]");
+  if (hashtagButton) {
+    event.preventDefault();
+    event.stopPropagation();
+    const tag = hashtagButton.dataset.hashtag;
+    state.hashtag = state.hashtag === tag ? "" : tag;
+    nav("events");
+    return;
+  }
+
+  if (event.target.closest("[data-clear-hashtag]")) {
+    state.hashtag = "";
+    render();
+    return;
   }
 
   const detailButton = event.target.closest("[data-detail]");

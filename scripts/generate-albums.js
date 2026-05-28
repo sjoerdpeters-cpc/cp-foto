@@ -224,6 +224,7 @@ function main() {
         description: meta.omschrijving || "",
         live: String(meta.live || "").toLowerCase() === "true",
         cover: photos[0]?.src || "",
+        hashtags: (meta.hashtags || "").split(",").map((t) => t.trim()).filter(Boolean),
         photos,
       };
     })

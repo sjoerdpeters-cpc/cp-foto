@@ -345,6 +345,60 @@ button {
   color: white;
 }
 
+/* ── Hashtag chips ───────────────────────────────────────────────────────── */
+.hashtag-chip {
+  display: inline-flex;
+  align-items: center;
+  border: 1.2px solid var(--cp-navy);
+  border-radius: 999px;
+  background: transparent;
+  padding: 3px 10px;
+  cursor: pointer;
+  color: var(--cp-navy);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-decoration: none;
+  transition: border-color 0.12s, background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+
+.hashtag-chip:hover {
+  background: var(--cp-navy);
+  color: white;
+}
+
+.hashtag-chip.active {
+  background: var(--cp-navy);
+  color: white;
+}
+
+.hashtag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.hashtag-bar {
+  padding: 10px var(--page-pad);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: rgba(14, 42, 85, 0.04);
+  border-bottom: 1px solid var(--cp-line);
+}
+
+.hashtag-chip-active {
+  background: var(--cp-navy) !important;
+  border-color: var(--cp-navy) !important;
+  color: white !important;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.08em;
+}
+
 .swatch {
   width: 10px;
   height: 10px;
