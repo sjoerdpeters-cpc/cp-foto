@@ -251,8 +251,6 @@ function navHtml(active = "home") {
         <a class="${eventsActive ? "active" : ""}" data-nav="events">Albums</a>
         <a data-nav="home" data-scroll="steps">Hoe het werkt</a>
         <a class="${active === "organizers" ? "active" : ""}" data-nav="organizers">Foto's laten maken?</a>
-        <a class="${active === "contact" ? "active" : ""}" data-nav="contact">Contact</a>
-        <a class="nav-privacy ${active === "privacy" ? "active" : ""}" data-nav="privacy">Privacy</a>
       </div>
       <span class="nav-divider"></span>
       <button class="btn dark" data-nav="checkout">${icon("cart")} Mandje <span class="cart-pill">${state.cart.length}</span></button>
@@ -269,8 +267,6 @@ function navHtml(active = "home") {
       <a class="mobile-nav-link ${eventsActive ? "active" : ""}" data-nav="events">Albums</a>
       <a class="mobile-nav-link" data-nav="home" data-scroll="steps">Hoe het werkt</a>
       <a class="mobile-nav-link ${active === "organizers" ? "active" : ""}" data-nav="organizers">Foto's laten maken?</a>
-      <a class="mobile-nav-link ${active === "contact" ? "active" : ""}" data-nav="contact">Contact</a>
-      <a class="mobile-nav-link ${active === "privacy" ? "active" : ""}" data-nav="privacy">Privacy</a>
       <button class="btn dark mobile-nav-cart" data-nav="checkout">${icon("cart")} Mandje <span class="cart-pill">${state.cart.length}</span></button>
     </div>
   `;
@@ -306,20 +302,15 @@ function photoCard(photo, showMeta = true) {
 
 function footerHtml() {
   return `
-    <footer class="footer" id="contact">
-      <div class="footer-grid">
-        <div>
-          <img class="footer-logo" src="Logo/cp_sportfotografie_variant5_volledige_presentatie.png" alt="CP-sportfotografie" />
-          <p style="margin-top:18px;font-size:13px;line-height:1.6;max-width:320px;color:rgba(255,255,255,.72)">
-            Sportfotograaf voor lopers, voetballers en alles ertussen. Vanuit Utrecht, overal in NL.
-          </p>
-          <div class="socials">${["IG", "FB", "LI", "YT"].map((s) => `<span class="mono">${s}</span>`).join("")}</div>
-        </div>
-        <div><h4>Voor sporters</h4><a data-nav="gallery">Zoek mijn foto</a><a data-nav="home" data-scroll="steps">Hoe het werkt</a><a data-nav="gallery">Prijzen</a><a>Account</a></div>
-        <div><h4>Voor organisatoren</h4><a id="organizers">Boek CP voor je event</a><a>Sponsor packages</a><a>Resultatenkoppeling</a><a>Cases</a></div>
-        <div><h4>Over</h4><a>Mijn verhaal</a><a data-nav="contact">Contact</a><a>Veelgestelde vragen</a><a data-nav="privacy">Voorwaarden · Privacy</a></div>
+    <footer class="footer footer-slim" id="contact">
+      <nav class="footer-links">
+        <a data-nav="contact">Contact</a>
+        <a data-nav="privacy">Privacy</a>
+        <a>Veelgestelde vragen</a>
+      </nav>
+      <div class="footer-bottom">
+        <span>© 2026 CP Sportfotografie — Sjoerd Peters. Alle rechten voorbehouden.</span>
       </div>
-      <div class="footer-bottom"><span>© 2026 CP-sportfotografie · KvK 12345678</span><span class="mono" style="letter-spacing:.18em">STILSTAAN IS GEEN OPTIE.</span></div>
     </footer>
   `;
 }
@@ -335,14 +326,9 @@ function homeHtml() {
             <div class="eyebrow" style="margin-bottom:22px"><span class="live">SINDS 06:14 · LIVE UPLOAD</span><span style="margin:0 10px;color:var(--cp-line)">/</span> Stadsloop Rotterdam · 24 mei 2026</div>
             <h1 class="display">Jouw moment,<br /><span style="color:var(--cp-red)">jouw herinnering,</span><br />jouw sportfoto.</h1>
             <div class="hero-copy"><span class="tick"></span><p>Zoek je foto, voorbeeld gratis. Hoge-res zonder watermerk vanaf €5.</p></div>
-            <div class="quick-search">
-              <div class="eyebrow">Snel zoeken · startnummer</div>
-              <div class="field bib lg">
-                <span class="pre" style="color:var(--cp-red)">#</span>
-                <input id="home-bib" value="${state.bib}" placeholder="4218" inputmode="numeric" maxlength="5" />
-                <button class="btn primary lg" data-nav="gallery">Vind mijn foto's →</button>
-              </div>
-              <div class="helper-row"><span class="mono" style="letter-spacing:.12em;text-transform:uppercase">Geen nummer?</span><a data-nav="events">Zoek je evenement →</a></div>
+            <div style="display:flex;gap:14px;flex-wrap:wrap;margin-top:8px">
+              <button class="btn primary lg" data-nav="events">Bekijk albums →</button>
+              <button class="btn ghost lg" data-nav="organizers">Foto's laten maken?</button>
             </div>
           </div>
           <div class="hero-photo crop">
