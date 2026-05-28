@@ -229,13 +229,12 @@ function navHtml(active = "home") {
         <img src="Logo/cp_sportfotografie_variant5_hoofdlogo.png" alt="CP-sportfotografie" />
       </button>
       <div class="nav-links">
-        <a class="${eventsActive ? "active" : ""}" data-nav="events">Evenementen</a>
+        <a class="${eventsActive ? "active" : ""}" data-nav="events">Albums</a>
         <a data-nav="home" data-scroll="steps">Hoe het werkt</a>
-        <a data-nav="home" data-scroll="organizers">Voor organisatoren</a>
+        <a data-nav="home" data-scroll="organizers">Foto's laten maken?</a>
         <a data-nav="home" data-scroll="contact">Contact</a>
       </div>
       <span class="nav-divider"></span>
-      <a class="nav-user">${icon("user")}<span>Inloggen</span></a>
       <button class="btn dark" data-nav="checkout">${icon("cart")} Mandje <span class="cart-pill">${state.cart.length}</span></button>
       <button class="hamburger ${state.menuOpen ? "open" : ""}" data-menu-toggle
         aria-label="${state.menuOpen ? "Menu sluiten" : "Menu openen"}"
@@ -247,9 +246,9 @@ function navHtml(active = "home") {
     <div class="mobile-nav-drawer ${state.menuOpen ? "open" : ""}">
       <button class="mobile-nav-close" data-menu-close aria-label="Menu sluiten">✕</button>
       <a class="mobile-nav-link ${active === "home" ? "active" : ""}" data-nav="home">Home</a>
-      <a class="mobile-nav-link ${eventsActive ? "active" : ""}" data-nav="events">Evenementen</a>
+      <a class="mobile-nav-link ${eventsActive ? "active" : ""}" data-nav="events">Albums</a>
       <a class="mobile-nav-link" data-nav="home" data-scroll="steps">Hoe het werkt</a>
-      <a class="mobile-nav-link" data-nav="home" data-scroll="organizers">Voor organisatoren</a>
+      <a class="mobile-nav-link" data-nav="home" data-scroll="organizers">Foto's laten maken?</a>
       <a class="mobile-nav-link" data-nav="home" data-scroll="contact">Contact</a>
       <button class="btn dark mobile-nav-cart" data-nav="checkout">${icon("cart")} Mandje <span class="cart-pill">${state.cart.length}</span></button>
     </div>
