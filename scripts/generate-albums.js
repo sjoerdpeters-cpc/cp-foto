@@ -135,7 +135,43 @@ function writeAlbumPage(slug) {
   );
 }
 
+const pricingDataPath = path.join(root, "pricing.data");
+const pricingJsonPath = path.join(root, "pricing.json");
+const PACKAGE_IDS = ["light", "basis", "individueel", "totaal"];
+
+function buildPricingJson(raw) {
+  return {
+    generatedAt: new Date().toISOString(),
+    foto: {
+      prijs: Number(raw["foto_prijs"]) || 5,
+      korting_3: Number(raw["korting_3_stuks"]) || 12,
+      korting_5: Number(raw["korting_5_stuks"]) || 25,
+    },
+    pakketten: PACKAGE_IDS.map((id) => ({
+      id,
+      naam: raw[`${id}_naam`] || id,
+      tagline: raw[`${id}_tagline`] || "",
+      prijs: Number(raw[`${id}_prijs`]) || 0,
+      omschrijving: raw[`${id}_omschrijving`] || "",
+      features: [1, 2, 3, 4].map((n) => raw[`${id}_feature_${n}`]).filter(Boolean),
+      populair: String(raw[`${id}_populair`] || "").toLowerCase() === "true",
+      donker: String(raw[`${id}_donker`] || "").toLowerCase() === "true",
+    })),
+  };
+}
+
 function main() {
+  // ── Pricing ──────────────────────────────────────────────────────────────
+  let photoPrice = 5;
+  if (fs.existsSync(pricingDataPath)) {
+    const pricingRaw = readContentData(pricingDataPath);
+    photoPrice = Number(pricingRaw["foto_prijs"]) || 5;
+    const pricingJson = buildPricingJson(pricingRaw);
+    fs.writeFileSync(pricingJsonPath, JSON.stringify(pricingJson, null, 2), "utf8");
+    console.log("pricing.json geschreven.");
+  }
+
+  // ── Albums ───────────────────────────────────────────────────────────────
   if (!fs.existsSync(albumsRoot)) {
     fs.writeFileSync(manifestPath, JSON.stringify({ generatedAt: new Date().toISOString(), albums: [] }, null, 2));
     return;
@@ -169,7 +205,7 @@ function main() {
           team: "",
           moment: "alle",
           ratio: 3 / 2,
-          price: 5,
+          price: photoPrice,
         };
       });
 

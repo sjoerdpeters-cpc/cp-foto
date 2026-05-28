@@ -7,6 +7,7 @@ dist/
 .env.*
 album/
 album-manifest.json
+pricing.json
 
 .vercel
 .claude/

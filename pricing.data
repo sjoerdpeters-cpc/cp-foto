@@ -1,0 +1,62 @@
+# ─────────────────────────────────────────────────────────────────────────────
+# CP-sportfotografie · Prijzen & Pakketten
+# Bewerk dit bestand om prijzen en teksten aan te passen.
+# Voer daarna uit: node scripts/generate-albums.js
+# Of push naar GitHub — de site wordt automatisch bijgewerkt.
+# ─────────────────────────────────────────────────────────────────────────────
+
+# ── Foto-prijzen ─────────────────────────────────────────────────────────────
+# Prijs per losse foto (in euro)
+[foto_prijs] = 5
+
+# Kortingstarieven (totaalprijs bij meerdere foto's, niet per stuk)
+[korting_3_stuks] = 12
+[korting_5_stuks] = 25
+
+# ── Pakket: Light ────────────────────────────────────────────────────────────
+[light_naam]         = Light
+[light_tagline]      = Kennismaking
+[light_populair]     = false
+[light_donker]       = false
+[light_prijs]        = 50
+[light_omschrijving] = Eerste keer kennis maken met sportfotografie van jouw team.
+[light_feature_1]    = 1 wedstrijd
+[light_feature_2]    = 20 downloadcredits
+[light_feature_3]    = Beelden naar keuze
+[light_feature_4]    = Hi-res zonder watermerk
+
+# ── Pakket: Basis ────────────────────────────────────────────────────────────
+[basis_naam]         = Basispakket
+[basis_tagline]      = Meest gekozen
+[basis_populair]     = true
+[basis_donker]       = false
+[basis_prijs]        = 75
+[basis_omschrijving] = Een volledige wedstrijd met een ruime selectie hoge-resolutiebeelden.
+[basis_feature_1]    = 1 wedstrijd
+[basis_feature_2]    = Min. 100 hi-res beelden
+[basis_feature_3]    = Online galerij
+[basis_feature_4]    = Downloadlink binnen 48u
+
+# ── Pakket: Individueel ──────────────────────────────────────────────────────
+[individueel_naam]         = Individueel
+[individueel_tagline]      = Persoonlijk
+[individueel_populair]     = false
+[individueel_donker]       = false
+[individueel_prijs]        = 100
+[individueel_omschrijving] = De fotograaf focust op één speler en levert een persoonlijke selectie.
+[individueel_feature_1]    = 1 wedstrijd
+[individueel_feature_2]    = Focus op 1 speler
+[individueel_feature_3]    = Persoonlijke selectie
+[individueel_feature_4]    = Hi-res zonder watermerk
+
+# ── Pakket: Totaal ───────────────────────────────────────────────────────────
+[totaal_naam]         = Totaalpakket
+[totaal_tagline]      = Alles erin
+[totaal_populair]     = false
+[totaal_donker]       = true
+[totaal_prijs]        = 250
+[totaal_omschrijving] = Alle beelden van de wedstrijd in volle resolutie — niets wordt achtergehouden.
+[totaal_feature_1]    = 1 wedstrijd
+[totaal_feature_2]    = Alle beelden hi-res
+[totaal_feature_3]    = Onbeperkte downloads
+[totaal_feature_4]    = Online galerij inbegrepen

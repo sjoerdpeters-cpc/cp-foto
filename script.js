@@ -51,6 +51,22 @@ let PHOTOS = (() => {
 
 let ALBUMS = [];
 
+// Fallback pricing — wordt overschreven zodra pricing.json geladen is
+let PRICING = {
+  foto: { prijs: 5, korting_3: 12, korting_5: 25 },
+  pakketten: [],
+};
+
+async function loadPricing() {
+  try {
+    const res = await fetch("pricing.json", { cache: "no-store" });
+    if (!res.ok) throw new Error(`pricing.json HTTP ${res.status}`);
+    PRICING = await res.json();
+  } catch (e) {
+    console.warn("pricing.json niet geladen; fallback gebruikt.", e);
+  }
+}
+
 function euro(value) {
   return `€${Number(value).toFixed(2).replace(".", ",")}`;
 }
@@ -194,14 +210,16 @@ function cartPhotos() {
 
 function cartTotal() {
   const count = cartPhotos().length;
-  if (count >= 5) return 25;
-  if (count >= 3) return 12;
-  return count * 5;
+  const { prijs, korting_3, korting_5 } = PRICING.foto;
+  if (count >= 5) return korting_5;
+  if (count >= 3) return korting_3;
+  return count * prijs;
 }
 
 function priceLabel(count = cartPhotos().length) {
-  if (count >= 5) return "5 en meer foto's per album";
-  if (count >= 3) return "3 foto's";
+  const { korting_3, korting_5 } = PRICING.foto;
+  if (count >= 5) return `${count} foto's · 5+ deal (${euro(korting_5)})`;
+  if (count >= 3) return `${count} foto's · 3-deal (${euro(korting_3)})`;
   return count === 1 ? "1 foto" : `${count} foto's`;
 }
 
@@ -622,48 +640,17 @@ function checkoutDoneHtml() {
   `;
 }
 
-const PACKAGES = [
-  {
-    id: "light",
-    tag: "Kennismaking",
-    name: "Light",
-    desc: "Eerste keer kennis maken met sportfotografie van jouw team.",
-    price: 50,
-    features: ["1 wedstrijd", "20 downloadcredits", "Beelden naar keuze", "Hi-res zonder watermerk"],
-    dark: false,
-    popular: false,
-  },
-  {
-    id: "basis",
-    tag: "Meest gekozen",
-    name: "Basispakket",
-    desc: "Een volledige wedstrijd met een ruime selectie hoge-resolutiebeelden.",
-    price: 75,
-    features: ["1 wedstrijd", "Min. 100 hi-res beelden", "Online galerij", "Downloadlink binnen 48u"],
-    dark: false,
-    popular: true,
-  },
-  {
-    id: "individueel",
-    tag: "Persoonlijk",
-    name: "Individueel",
-    desc: "De fotograaf focust op één speler en levert een persoonlijke selectie.",
-    price: 100,
-    features: ["1 wedstrijd", "Focus op 1 speler", "Persoonlijke selectie", "Hi-res zonder watermerk"],
-    dark: false,
-    popular: false,
-  },
-  {
-    id: "totaal",
-    tag: "Alles erin",
-    name: "Totaalpakket",
-    desc: "Alle beelden van de wedstrijd in volle resolutie — niets wordt achtergehouden.",
-    price: 250,
-    features: ["1 wedstrijd", "Alle beelden hi-res", "Onbeperkte downloads", "Online galerij inbegrepen"],
-    dark: true,
-    popular: false,
-  },
+// Fallback pakketten — worden vervangen door pricing.json zodra geladen
+const PACKAGES_FALLBACK = [
+  { id: "light",       naam: "Light",        tagline: "Kennismaking",  prijs: 50,  omschrijving: "Eerste keer kennis maken met sportfotografie van jouw team.",       features: ["1 wedstrijd","20 downloadcredits","Beelden naar keuze","Hi-res zonder watermerk"], populair: false, donker: false },
+  { id: "basis",       naam: "Basispakket",  tagline: "Meest gekozen", prijs: 75,  omschrijving: "Een volledige wedstrijd met een ruime selectie hoge-resolutiebeelden.", features: ["1 wedstrijd","Min. 100 hi-res beelden","Online galerij","Downloadlink binnen 48u"], populair: true,  donker: false },
+  { id: "individueel", naam: "Individueel",  tagline: "Persoonlijk",   prijs: 100, omschrijving: "De fotograaf focust op één speler en levert een persoonlijke selectie.",  features: ["1 wedstrijd","Focus op 1 speler","Persoonlijke selectie","Hi-res zonder watermerk"], populair: false, donker: false },
+  { id: "totaal",      naam: "Totaalpakket", tagline: "Alles erin",    prijs: 250, omschrijving: "Alle beelden van de wedstrijd in volle resolutie — niets wordt achtergehouden.", features: ["1 wedstrijd","Alle beelden hi-res","Onbeperkte downloads","Online galerij inbegrepen"], populair: false, donker: true  },
 ];
+
+function packages() {
+  return PRICING.pakketten.length ? PRICING.pakketten : PACKAGES_FALLBACK;
+}
 
 function organizersHtml() {
   return `
@@ -682,20 +669,20 @@ function organizersHtml() {
       </section>
       <section class="section">
         <div class="pkg-grid">
-          ${PACKAGES.map((pkg) => `
-            <article class="card pkg-card ${pkg.dark ? "pkg-dark" : ""} ${pkg.popular ? "pkg-popular" : ""}">
-              ${pkg.popular ? `<div class="pkg-badge">⭐ Meest gekozen</div>` : ""}
-              <div class="eyebrow" style="${pkg.dark ? "color:rgba(255,255,255,.55)" : ""}">${pkg.tag}</div>
-              <h2 class="display pkg-name" style="${pkg.dark ? "color:white" : ""}">${pkg.name}</h2>
-              <p class="pkg-desc" style="${pkg.dark ? "color:rgba(255,255,255,.72)" : ""}">${pkg.desc}</p>
+          ${packages().map((pkg) => `
+            <article class="card pkg-card ${pkg.donker ? "pkg-dark" : ""} ${pkg.populair ? "pkg-popular" : ""}">
+              ${pkg.populair ? `<div class="pkg-badge">⭐ Meest gekozen</div>` : ""}
+              <div class="eyebrow" style="${pkg.donker ? "color:rgba(255,255,255,.55)" : ""}">${pkg.tagline}</div>
+              <h2 class="display pkg-name" style="${pkg.donker ? "color:white" : ""}">${pkg.naam}</h2>
+              <p class="pkg-desc" style="${pkg.donker ? "color:rgba(255,255,255,.72)" : ""}">${pkg.omschrijving}</p>
               <div class="pkg-price">
-                <span class="num" style="color:${pkg.dark ? "var(--cp-zest)" : "var(--cp-navy)"};font-size:64px">${euro(pkg.price)}</span>
-                <span style="font-size:13px;color:${pkg.dark ? "rgba(255,255,255,.55)" : "var(--cp-mute)"}">per wedstrijd</span>
+                <span class="num" style="color:${pkg.donker ? "var(--cp-zest)" : "var(--cp-navy)"};font-size:64px">${euro(pkg.prijs)}</span>
+                <span style="font-size:13px;color:${pkg.donker ? "rgba(255,255,255,.55)" : "var(--cp-mute)"}">per wedstrijd</span>
               </div>
-              <ul class="pkg-list" style="${pkg.dark ? "color:rgba(255,255,255,.85)" : ""}">
+              <ul class="pkg-list" style="${pkg.donker ? "color:rgba(255,255,255,.85)" : ""}">
                 ${pkg.features.map((f) => `<li><span class="check">${icon("check")}</span>${f}</li>`).join("")}
               </ul>
-              <button class="btn ${pkg.dark ? "primary" : "dark"} lg pkg-cta" data-nav="contact" data-pkg="${pkg.id}">Boek ${pkg.name} →</button>
+              <button class="btn ${pkg.donker ? "primary" : "dark"} lg pkg-cta" data-nav="contact" data-pkg="${pkg.id}">Boek ${pkg.naam} →</button>
             </article>
           `).join("")}
         </div>
@@ -918,8 +905,8 @@ document.addEventListener("click", (event) => {
 
   const pkgButton = event.target.closest("[data-pkg]");
   if (pkgButton && event.target.closest("[data-nav='contact']")) {
-    const pkg = PACKAGES.find((p) => p.id === pkgButton.dataset.pkg);
-    if (pkg) state.contactForm.bericht = `Ik heb interesse in het ${pkg.name} (€${pkg.price}). `;
+    const pkg = packages().find((p) => p.id === pkgButton.dataset.pkg);
+    if (pkg) state.contactForm.bericht = `Ik heb interesse in het ${pkg.naam} (€${pkg.prijs}). `;
   }
 
   const detailButton = event.target.closest("[data-detail]");
@@ -995,7 +982,7 @@ document.addEventListener("input", (event) => {
   }
 });
 
-loadAlbums().then(() => {
+Promise.all([loadAlbums(), loadPricing()]).then(() => {
   applyHash(); // pas URL-hash toe vóórdat we renderen
   render();
 });
