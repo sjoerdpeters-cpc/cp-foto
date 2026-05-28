@@ -16,6 +16,7 @@ const state = {
     terms: false,
   },
   cart: JSON.parse(localStorage.getItem("cp-cart") || "[]"),
+  contactForm: { naam: "", email: "", telefoon: "", bericht: "", sent: false },
 };
 
 let EVENTS = [
@@ -75,7 +76,7 @@ function applyHash() {
   const raw = window.location.hash.slice(1);
   if (!raw) return;
   const [screen, param] = raw.split("/");
-  const valid = ["home", "events", "gallery", "detail", "checkout"];
+  const valid = ["home", "events", "gallery", "detail", "checkout", "organizers", "contact"];
   if (!valid.includes(screen)) return;
   state.screen = screen;
   if (screen === "gallery" && param && ALBUMS.length) {
@@ -231,8 +232,8 @@ function navHtml(active = "home") {
       <div class="nav-links">
         <a class="${eventsActive ? "active" : ""}" data-nav="events">Albums</a>
         <a data-nav="home" data-scroll="steps">Hoe het werkt</a>
-        <a data-nav="home" data-scroll="organizers">Foto's laten maken?</a>
-        <a data-nav="home" data-scroll="contact">Contact</a>
+        <a class="${active === "organizers" ? "active" : ""}" data-nav="organizers">Foto's laten maken?</a>
+        <a class="${active === "contact" ? "active" : ""}" data-nav="contact">Contact</a>
       </div>
       <span class="nav-divider"></span>
       <button class="btn dark" data-nav="checkout">${icon("cart")} Mandje <span class="cart-pill">${state.cart.length}</span></button>
@@ -248,8 +249,8 @@ function navHtml(active = "home") {
       <a class="mobile-nav-link ${active === "home" ? "active" : ""}" data-nav="home">Home</a>
       <a class="mobile-nav-link ${eventsActive ? "active" : ""}" data-nav="events">Albums</a>
       <a class="mobile-nav-link" data-nav="home" data-scroll="steps">Hoe het werkt</a>
-      <a class="mobile-nav-link" data-nav="home" data-scroll="organizers">Foto's laten maken?</a>
-      <a class="mobile-nav-link" data-nav="home" data-scroll="contact">Contact</a>
+      <a class="mobile-nav-link ${active === "organizers" ? "active" : ""}" data-nav="organizers">Foto's laten maken?</a>
+      <a class="mobile-nav-link ${active === "contact" ? "active" : ""}" data-nav="contact">Contact</a>
       <button class="btn dark mobile-nav-cart" data-nav="checkout">${icon("cart")} Mandje <span class="cart-pill">${state.cart.length}</span></button>
     </div>
   `;
@@ -621,14 +622,186 @@ function checkoutDoneHtml() {
   `;
 }
 
+const PACKAGES = [
+  {
+    id: "light",
+    tag: "Kennismaking",
+    name: "Light",
+    desc: "Eerste keer kennis maken met sportfotografie van jouw team.",
+    price: 50,
+    features: ["1 wedstrijd", "20 downloadcredits", "Beelden naar keuze", "Hi-res zonder watermerk"],
+    dark: false,
+    popular: false,
+  },
+  {
+    id: "basis",
+    tag: "Meest gekozen",
+    name: "Basispakket",
+    desc: "Een volledige wedstrijd met een ruime selectie hoge-resolutiebeelden.",
+    price: 75,
+    features: ["1 wedstrijd", "Min. 100 hi-res beelden", "Online galerij", "Downloadlink binnen 48u"],
+    dark: false,
+    popular: true,
+  },
+  {
+    id: "individueel",
+    tag: "Persoonlijk",
+    name: "Individueel",
+    desc: "De fotograaf focust op één speler en levert een persoonlijke selectie.",
+    price: 100,
+    features: ["1 wedstrijd", "Focus op 1 speler", "Persoonlijke selectie", "Hi-res zonder watermerk"],
+    dark: false,
+    popular: false,
+  },
+  {
+    id: "totaal",
+    tag: "Alles erin",
+    name: "Totaalpakket",
+    desc: "Alle beelden van de wedstrijd in volle resolutie — niets wordt achtergehouden.",
+    price: 250,
+    features: ["1 wedstrijd", "Alle beelden hi-res", "Onbeperkte downloads", "Online galerij inbegrepen"],
+    dark: true,
+    popular: false,
+  },
+];
+
+function organizersHtml() {
+  return `
+    ${navHtml("organizers")}
+    <main>
+      <section class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="eyebrow">Voor clubs &amp; organisaties</div>
+            <h1 class="display page-title">Foto's laten <span style="color:var(--cp-red)">maken?</span></h1>
+          </div>
+        </div>
+        <p style="max-width:640px;font-size:17px;line-height:1.65;color:var(--cp-ink);margin:0">
+          CP-sportfotografie fotografeert jouw wedstrijd van begin tot eind. Kies een pakket dat past bij jouw club of evenement — van een eerste kennismaking tot een complete galerij voor de hele selectie.
+        </p>
+      </section>
+      <section class="section">
+        <div class="pkg-grid">
+          ${PACKAGES.map((pkg) => `
+            <article class="card pkg-card ${pkg.dark ? "pkg-dark" : ""} ${pkg.popular ? "pkg-popular" : ""}">
+              ${pkg.popular ? `<div class="pkg-badge">⭐ Meest gekozen</div>` : ""}
+              <div class="eyebrow" style="${pkg.dark ? "color:rgba(255,255,255,.55)" : ""}">${pkg.tag}</div>
+              <h2 class="display pkg-name" style="${pkg.dark ? "color:white" : ""}">${pkg.name}</h2>
+              <p class="pkg-desc" style="${pkg.dark ? "color:rgba(255,255,255,.72)" : ""}">${pkg.desc}</p>
+              <div class="pkg-price">
+                <span class="num" style="color:${pkg.dark ? "var(--cp-zest)" : "var(--cp-navy)"};font-size:64px">${euro(pkg.price)}</span>
+                <span style="font-size:13px;color:${pkg.dark ? "rgba(255,255,255,.55)" : "var(--cp-mute)"}">per wedstrijd</span>
+              </div>
+              <ul class="pkg-list" style="${pkg.dark ? "color:rgba(255,255,255,.85)" : ""}">
+                ${pkg.features.map((f) => `<li><span class="check">${icon("check")}</span>${f}</li>`).join("")}
+              </ul>
+              <button class="btn ${pkg.dark ? "primary" : "dark"} lg pkg-cta" data-nav="contact" data-pkg="${pkg.id}">Boek ${pkg.name} →</button>
+            </article>
+          `).join("")}
+        </div>
+      </section>
+      <section class="quote-section" style="text-align:center">
+        <div style="position:relative;max-width:720px;margin:0 auto">
+          <div class="eyebrow" style="margin-bottom:18px">Op maat</div>
+          <p class="display" style="font-size:clamp(36px,4vw,56px);color:var(--cp-navy);margin:0 0 20px">Toch iets anders nodig?</p>
+          <p style="font-size:16px;line-height:1.65;color:var(--cp-ink);max-width:480px;margin:0 auto 28px">Meerdere wedstrijden, een seizoenspakket of iets speciaals? Stuur een berichtje en ik denk graag mee.</p>
+          <button class="btn dark lg" data-nav="contact">Neem contact op →</button>
+        </div>
+      </section>
+    </main>
+    ${footerHtml()}
+  `;
+}
+
+function contactHtml() {
+  if (state.contactForm.sent) {
+    return `
+      ${navHtml("contact")}
+      <main>
+        <section class="section">
+          <div class="checkout-done card">
+            <div class="eyebrow">Bericht verstuurd</div>
+            <h1 class="display">Bedankt!<br /><span style="color:var(--cp-red)">Ik neem snel contact op.</span></h1>
+            <p>Je bericht is ontvangen. Ik reageer meestal binnen één werkdag op <strong>${escapeHtml(state.contactForm.email || "je e-mailadres")}</strong>.</p>
+            <div class="checkout-actions">
+              <button class="btn dark lg" data-nav="home">Terug naar home</button>
+              <button class="btn ghost lg" data-reset-contact>Nieuw bericht</button>
+            </div>
+          </div>
+        </section>
+      </main>
+      ${footerHtml()}
+    `;
+  }
+
+  return `
+    ${navHtml("contact")}
+    <main>
+      <section class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="eyebrow">Stuur een berichtje</div>
+            <h1 class="display page-title">Con<span style="color:var(--cp-red)">tact</span>.</h1>
+          </div>
+        </div>
+      </section>
+      <section class="section" style="padding-top:40px">
+        <div class="contact-grid">
+          <div class="card contact-form">
+            <div class="checkout-fields">
+              <label>Naam<input data-contact-field="naam" value="${escapeHtml(state.contactForm.naam)}" placeholder="Jan de Vries" autocomplete="name" /></label>
+              <label>E-mail<input data-contact-field="email" type="email" value="${escapeHtml(state.contactForm.email)}" placeholder="naam@example.nl" autocomplete="email" inputmode="email" /></label>
+            </div>
+            <label class="contact-label">Telefoon <span style="font-weight:400;opacity:.55">(optioneel)</span>
+              <input data-contact-field="telefoon" type="tel" value="${escapeHtml(state.contactForm.telefoon)}" placeholder="+31 6 12 34 56 78" autocomplete="tel" />
+            </label>
+            <label class="contact-label">Bericht
+              <textarea data-contact-field="bericht" rows="6" placeholder="Vertel iets over je club, de wedstrijd of het evenement...">${escapeHtml(state.contactForm.bericht)}</textarea>
+            </label>
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap">
+              <button class="btn primary lg" data-send-contact>Verstuur bericht →</button>
+              <span class="checkout-note" style="margin:0">Ik reageer meestal binnen één werkdag.</span>
+            </div>
+          </div>
+          <div class="contact-sidebar">
+            <div class="card" style="padding:28px">
+              <div class="eyebrow" style="margin-bottom:18px">Direct contact</div>
+              <div class="contact-info-row">
+                <span class="mono" style="font-size:11px;letter-spacing:.14em;color:var(--cp-mute)">E-MAIL</span>
+                <a href="mailto:info@cp-sportfotografie.nl" style="color:var(--cp-navy);font-weight:700;text-decoration:none">info@cp-sportfotografie.nl</a>
+              </div>
+              <div class="contact-info-row">
+                <span class="mono" style="font-size:11px;letter-spacing:.14em;color:var(--cp-mute)">GEBASEERD IN</span>
+                <span style="font-weight:700;color:var(--cp-navy)">Utrecht · heel Nederland</span>
+              </div>
+              <div class="contact-info-row" style="border:0;padding-bottom:0">
+                <span class="mono" style="font-size:11px;letter-spacing:.14em;color:var(--cp-mute)">REACTIETIJD</span>
+                <span style="font-weight:700;color:var(--cp-navy)">Binnen 1 werkdag</span>
+              </div>
+            </div>
+            <div class="card" style="padding:28px;margin-top:16px">
+              <div class="eyebrow" style="margin-bottom:14px">Pakketten</div>
+              <p style="margin:0 0 18px;font-size:14px;line-height:1.6;color:var(--cp-ink)">Interesse in een pakket? Vermeld dan welk pakket en de datum van de wedstrijd in je bericht.</p>
+              <button class="btn ghost" data-nav="organizers">Bekijk pakketten →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+    ${footerHtml()}
+  `;
+}
+
 function render() {
   const album = currentAlbum();
   const titles = {
     home: "CP-sportfotografie",
-    events: "Evenementen · CP-sportfotografie",
+    events: "Albums · CP-sportfotografie",
     gallery: `${album?.title || "Galerij"} · CP-sportfotografie`,
     detail: `Foto · CP-sportfotografie`,
     checkout: "Afrekenen · CP-sportfotografie",
+    organizers: "Foto's laten maken · CP-sportfotografie",
+    contact: "Contact · CP-sportfotografie",
   };
   document.title = titles[state.screen] || "CP-sportfotografie";
   app.className = "app-shell";
@@ -636,6 +809,8 @@ function render() {
     : state.screen === "gallery" ? galleryHtml()
     : state.screen === "detail" ? detailHtml()
     : state.screen === "checkout" ? checkoutHtml()
+    : state.screen === "organizers" ? organizersHtml()
+    : state.screen === "contact" ? contactHtml()
     : homeHtml();
 }
 
@@ -719,6 +894,34 @@ document.addEventListener("click", (event) => {
     return;
   }
 
+  const sendContactButton = event.target.closest("[data-send-contact]");
+  if (sendContactButton) {
+    event.preventDefault();
+    document.querySelectorAll(".contact-error").forEach((el) => el.remove());
+    if (!state.contactForm.naam || !state.contactForm.email || !state.contactForm.bericht) {
+      sendContactButton.insertAdjacentHTML("afterend", '<p class="contact-error checkout-error">Vul je naam, e-mail en bericht in.</p>');
+      return;
+    }
+    // TODO: koppel hier Formspree of een andere form-backend aan
+    state.contactForm.sent = true;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  const resetContactButton = event.target.closest("[data-reset-contact]");
+  if (resetContactButton) {
+    state.contactForm = { naam: "", email: "", telefoon: "", bericht: "", sent: false };
+    nav("contact");
+    return;
+  }
+
+  const pkgButton = event.target.closest("[data-pkg]");
+  if (pkgButton && event.target.closest("[data-nav='contact']")) {
+    const pkg = PACKAGES.find((p) => p.id === pkgButton.dataset.pkg);
+    if (pkg) state.contactForm.bericht = `Ik heb interesse in het ${pkg.name} (€${pkg.price}). `;
+  }
+
   const detailButton = event.target.closest("[data-detail]");
   if (detailButton) {
     event.preventDefault();
@@ -766,8 +969,13 @@ document.addEventListener("click", (event) => {
 document.addEventListener("input", (event) => {
   if (event.target.matches("[data-checkout-field]")) {
     state.checkout[event.target.dataset.checkoutField] = event.target.value;
-    // Clear inline error as soon as the user starts correcting
     document.querySelectorAll(".checkout-error").forEach((el) => el.remove());
+    return;
+  }
+
+  if (event.target.matches("[data-contact-field]")) {
+    state.contactForm[event.target.dataset.contactField] = event.target.value;
+    document.querySelectorAll(".contact-error").forEach((el) => el.remove());
     return;
   }
 
