@@ -1711,6 +1711,132 @@ button {
   }
 }
 
+/* ─── Privacy melden (onder foto) ─── */
+.photo-report {
+  display: block;
+  margin-top: 5px;
+  padding: 2px 0;
+  color: var(--cp-mute);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.18s, color 0.18s;
+}
+
+.photo-wrap:hover .photo-report {
+  opacity: 1;
+}
+
+/* Always visible on touch */
+@media (hover: none) {
+  .photo-report { opacity: 1; }
+}
+
+.photo-report:hover {
+  color: var(--cp-red);
+}
+
+.photo-report--detail {
+  opacity: 1;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: none;
+  font-family: var(--font-body);
+  color: var(--cp-mute);
+}
+
+.photo-report--detail:hover {
+  color: var(--cp-red);
+}
+
+/* ─── Nav privacy link (iets subtieler) ─── */
+.nav-privacy {
+  font-size: 12px !important;
+  opacity: 0.7;
+}
+
+.nav-privacy:hover,
+.nav-privacy.active {
+  opacity: 1;
+}
+
+/* ─── Privacy pagina ─── */
+.privacy-content {
+  padding-top: 40px;
+}
+
+.privacy-body {
+  max-width: 760px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.privacy-block {
+  padding: 36px 0;
+  border-bottom: 1px solid var(--cp-line);
+}
+
+.privacy-block:last-of-type {
+  border-bottom: 0;
+}
+
+.privacy-block p {
+  margin: 14px 0 0;
+  font-size: 16px;
+  line-height: 1.7;
+  color: var(--cp-ink);
+}
+
+.privacy-block p + p {
+  margin-top: 10px;
+}
+
+.privacy-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--cp-ink);
+}
+
+.privacy-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.privacy-list .check {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.privacy-highlight {
+  background: var(--cp-paper-2);
+  border-radius: var(--r-lg);
+  padding: 32px;
+  border: 0;
+  margin: 8px 0;
+}
+
+.privacy-meta {
+  padding-top: 24px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  color: var(--cp-mute);
+  text-transform: uppercase;
+}
+
 /* ─── Pakket-tegels ─── */
 .pkg-grid {
   display: grid;

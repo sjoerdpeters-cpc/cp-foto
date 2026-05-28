@@ -92,7 +92,7 @@ function applyHash() {
   const raw = window.location.hash.slice(1);
   if (!raw) return;
   const [screen, param] = raw.split("/");
-  const valid = ["home", "events", "gallery", "detail", "checkout", "organizers", "contact"];
+  const valid = ["home", "events", "gallery", "detail", "checkout", "organizers", "contact", "privacy"];
   if (!valid.includes(screen)) return;
   state.screen = screen;
   if (screen === "gallery" && param && ALBUMS.length) {
@@ -252,6 +252,7 @@ function navHtml(active = "home") {
         <a data-nav="home" data-scroll="steps">Hoe het werkt</a>
         <a class="${active === "organizers" ? "active" : ""}" data-nav="organizers">Foto's laten maken?</a>
         <a class="${active === "contact" ? "active" : ""}" data-nav="contact">Contact</a>
+        <a class="nav-privacy ${active === "privacy" ? "active" : ""}" data-nav="privacy">Privacy</a>
       </div>
       <span class="nav-divider"></span>
       <button class="btn dark" data-nav="checkout">${icon("cart")} Mandje <span class="cart-pill">${state.cart.length}</span></button>
@@ -269,9 +270,19 @@ function navHtml(active = "home") {
       <a class="mobile-nav-link" data-nav="home" data-scroll="steps">Hoe het werkt</a>
       <a class="mobile-nav-link ${active === "organizers" ? "active" : ""}" data-nav="organizers">Foto's laten maken?</a>
       <a class="mobile-nav-link ${active === "contact" ? "active" : ""}" data-nav="contact">Contact</a>
+      <a class="mobile-nav-link ${active === "privacy" ? "active" : ""}" data-nav="privacy">Privacy</a>
       <button class="btn dark mobile-nav-cart" data-nav="checkout">${icon("cart")} Mandje <span class="cart-pill">${state.cart.length}</span></button>
     </div>
   `;
+}
+
+function reportMailto(photo) {
+  const album = currentAlbum();
+  const subject = encodeURIComponent(`Privacymelding – foto ${photo.id}`);
+  const body = encodeURIComponent(
+    `Beste CP-sportfotografie,\n\nIk wil verzoeken om de volgende foto offline te halen:\n\nFoto-ID: ${photo.id}\nStartnummer: #${photo.bib}\nAlbum: ${album?.title || "onbekend"}\n\nMijn naam:\nMijn reden:\n\nMet vriendelijke groet,`
+  );
+  return `mailto:info@cp-sportfotografie.nl?subject=${subject}&body=${body}`;
 }
 
 function photoCard(photo, showMeta = true) {
@@ -288,6 +299,7 @@ function photoCard(photo, showMeta = true) {
           <span class="photo-price">${euro(photo.price)}</span>
         ` : ""}
       </button>
+      ${showMeta ? `<a class="photo-report" href="${reportMailto(photo)}" title="Verzoek om verwijdering">Privacy melden</a>` : ""}
     </div>
   `;
 }
@@ -305,7 +317,7 @@ function footerHtml() {
         </div>
         <div><h4>Voor sporters</h4><a data-nav="gallery">Zoek mijn foto</a><a data-nav="home" data-scroll="steps">Hoe het werkt</a><a data-nav="gallery">Prijzen</a><a>Account</a></div>
         <div><h4>Voor organisatoren</h4><a id="organizers">Boek CP voor je event</a><a>Sponsor packages</a><a>Resultatenkoppeling</a><a>Cases</a></div>
-        <div><h4>Over</h4><a>Mijn verhaal</a><a data-scroll="contact">Contact</a><a>Veelgestelde vragen</a><a>Voorwaarden · Privacy</a></div>
+        <div><h4>Over</h4><a>Mijn verhaal</a><a data-nav="contact">Contact</a><a>Veelgestelde vragen</a><a data-nav="privacy">Voorwaarden · Privacy</a></div>
       </div>
       <div class="footer-bottom"><span>© 2026 CP-sportfotografie · KvK 12345678</span><span class="mono" style="letter-spacing:.18em">STILSTAAN IS GEEN OPTIE.</span></div>
     </footer>
@@ -491,6 +503,9 @@ function detailHtml() {
         <div>
           <div class="crop"><span class="crop-tr"></span><span class="crop-br"></span><div class="photo detail-photo"><img src="${p.src.replace(/\/720\/\d+$/, "/1200/800")}" alt="Foto #${p.bib}" /><span class="wm"></span><span class="bib-badge display">#${p.bib}</span><span class="photo-ts">${p.ts || "CP"} · ${location.toUpperCase()}</span></div></div>
           <div class="meta-strip">${[["Startnummer", `#${p.bib}`, "display"], ["Tijdstip", p.ts || "-", "mono"], ["Locatie", location, "mono"], ["Fotograaf", "S. Peters", "mono"]].map(([l, v, c]) => `<div class="meta-cell"><div class="eyebrow">${l}</div><div class="${c}" style="margin-top:6px;font-size:${c === "display" ? "30px" : "16px"};color:var(--cp-navy);font-weight:${c === "mono" ? "700" : "400"}">${v}</div></div>`).join("")}</div>
+          <div style="margin-top:14px;text-align:right">
+            <a class="photo-report photo-report--detail" href="${reportMailto(p)}">Sta je op deze foto en wil je hem offline laten halen? Klik hier →</a>
+          </div>
           <div style="margin-top:40px"><div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px"><div><div class="eyebrow">Meer met</div><h3 class="display" style="margin:6px 0 0;font-size:32px;color:var(--cp-navy)">#${p.bib}</h3></div><button class="btn ghost sm">5 en meer foto's per album · €25 →</button></div><div class="related-grid">${more.slice(0, 4).map((r) => photoCard({ ...r, ratio: 3 / 2 })).join("")}</div></div>
           <div style="margin-top:40px"><div class="eyebrow" style="margin-bottom:14px">Verder bladeren in dit evenement</div><div class="browse-grid">${more.slice(4, 10).map((r) => photoCard({ ...r, ratio: 1 }, false)).join("")}</div></div>
         </div>
@@ -779,6 +794,66 @@ function contactHtml() {
   `;
 }
 
+function privacyHtml() {
+  return `
+    ${navHtml("privacy")}
+    <main>
+      <section class="page-header">
+        <div class="page-header-row">
+          <div>
+            <div class="eyebrow">Jouw rechten</div>
+            <h1 class="display page-title">Pri<span style="color:var(--cp-red)">vacy</span>.</h1>
+          </div>
+        </div>
+      </section>
+      <section class="section privacy-content">
+        <div class="privacy-body">
+
+          <div class="privacy-block">
+            <h2 class="display" style="font-size:36px;color:var(--cp-navy)">We vinden privacy belangrijk.</h2>
+            <p>Bij CP-sportfotografie fotograferen we sport zoals het hoort: met respect voor iedereen in beeld. We werken uitsluitend <strong>op uitnodiging van clubs, teams of individuele sporters</strong>. Foto's worden nooit zonder context of toestemming gepubliceerd.</p>
+          </div>
+
+          <div class="privacy-block">
+            <h2 class="display" style="font-size:28px;color:var(--cp-navy)">Hoe we werken</h2>
+            <ul class="privacy-list">
+              <li><span class="check">${icon("check")}</span>We fotograferen alleen na een boeking of uitnodiging van een club, team of organisator.</li>
+              <li><span class="check">${icon("check")}</span>Foto's worden uitsluitend geplaatst in een afgeschermde galerij die gekoppeld is aan een specifiek evenement.</li>
+              <li><span class="check">${icon("check")}</span>We verkopen geen persoonsgegevens aan derden.</li>
+              <li><span class="check">${icon("check")}</span>Betaalgegevens worden verwerkt via een gecertificeerde betaalprovider en nooit door ons opgeslagen.</li>
+              <li><span class="check">${icon("check")}</span>E-mailadressen die worden achtergelaten bij een aankoop gebruiken we alleen voor het bezorgen van de downloadlink.</li>
+            </ul>
+          </div>
+
+          <div class="privacy-block privacy-highlight">
+            <h2 class="display" style="font-size:28px;color:var(--cp-navy)">Sta je op een foto en wil je hem offline laten halen?</h2>
+            <p>Dat kan — en we handelen dit snel af. Ga naar de foto in kwestie en klik op de link <strong>"Privacy melden"</strong> onder de foto. Er opent automatisch een e-mail met de foto-informatie al ingevuld. Verstuur de e-mail en we halen de foto <strong>binnen 5 werkdagen offline</strong>.</p>
+            <p>Je hoeft geen account te hebben om een melding te doen.</p>
+            <button class="btn dark" data-nav="events">Ga naar de albums →</button>
+          </div>
+
+          <div class="privacy-block">
+            <h2 class="display" style="font-size:28px;color:var(--cp-navy)">Cookies &amp; analytics</h2>
+            <p>Deze website plaatst geen tracking-cookies en gebruikt geen externe analysediensten zoals Google Analytics. We slaan alleen de inhoud van je winkelmandje op in je browser (localStorage) zodat je selectie bewaard blijft. Zodra je je browser sluit of het mandje leegt, verdwijnen deze gegevens.</p>
+          </div>
+
+          <div class="privacy-block">
+            <h2 class="display" style="font-size:28px;color:var(--cp-navy)">Contact &amp; vragen</h2>
+            <p>Heb je vragen over hoe we omgaan met jouw gegevens, of wil je een foto laten verwijderen? Neem dan contact op via <a href="mailto:info@cp-sportfotografie.nl" style="color:var(--cp-red);font-weight:700">info@cp-sportfotografie.nl</a> of via het contactformulier.</p>
+            <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:18px">
+              <button class="btn primary" data-nav="contact">Contactformulier →</button>
+              <a class="btn ghost" href="mailto:info@cp-sportfotografie.nl">Stuur direct een e-mail</a>
+            </div>
+          </div>
+
+          <p class="privacy-meta">Laatste update: mei 2026 · CP-sportfotografie · Utrecht</p>
+        </div>
+      </section>
+    </main>
+    ${footerHtml()}
+  `;
+}
+
 function render() {
   const album = currentAlbum();
   const titles = {
@@ -789,6 +864,7 @@ function render() {
     checkout: "Afrekenen · CP-sportfotografie",
     organizers: "Foto's laten maken · CP-sportfotografie",
     contact: "Contact · CP-sportfotografie",
+    privacy: "Privacy · CP-sportfotografie",
   };
   document.title = titles[state.screen] || "CP-sportfotografie";
   app.className = "app-shell";
@@ -798,6 +874,7 @@ function render() {
     : state.screen === "checkout" ? checkoutHtml()
     : state.screen === "organizers" ? organizersHtml()
     : state.screen === "contact" ? contactHtml()
+    : state.screen === "privacy" ? privacyHtml()
     : homeHtml();
 }
 
