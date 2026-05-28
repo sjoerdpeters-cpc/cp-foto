@@ -160,10 +160,11 @@ button {
 }
 
 .logo img {
-  width: 178px;
-  height: 46px;
+  width: 210px;
+  height: auto;
   object-fit: contain;
   object-position: left center;
+  mix-blend-mode: multiply;
 }
 
 .nav-links {
@@ -1496,7 +1497,7 @@ button {
   }
 
   .logo img {
-    width: 150px;
+    width: 175px;
   }
 
   .hero,
@@ -1581,7 +1582,7 @@ button {
 
 
   .logo img {
-    width: 132px;
+    width: 150px;
   }
 
   .hero {
