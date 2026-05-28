@@ -1,0 +1,255 @@
+/* CP-sportfotografie — design tokens & utilities */
+
+:root{
+  --cp-navy:#0E2A55;
+  --cp-navy-deep:#091A36;
+  --cp-navy-soft:#1A3A6E;
+  --cp-red:#E62333;
+  --cp-red-deep:#B81620;
+  --cp-paper:#F7F5F2;
+  --cp-paper-2:#EFEBE3;
+  --cp-paper-3:#E4DFD3;
+  --cp-ink:#0A1530;
+  --cp-mute:#6B7385;
+  --cp-line:rgba(10,21,48,0.12);
+  --cp-zest:#F2FF49;
+  --cp-accent:var(--cp-red);
+
+  --r-sm:6px;
+  --r-md:10px;
+  --r-lg:16px;
+  --r-xl:24px;
+
+  --font-display:"Anton","Bebas Neue",Impact,Haettenschweiler,sans-serif;
+  --font-body:"Manrope",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+
+  --shadow-card:0 1px 0 rgba(10,21,48,.04), 0 12px 32px -16px rgba(10,21,48,.18);
+  --shadow-pop:0 16px 48px -16px rgba(10,21,48,.32), 0 2px 8px -2px rgba(10,21,48,.12);
+}
+
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0}
+button{font:inherit;color:inherit}
+
+.cp{
+  font-family:var(--font-body);
+  color:var(--cp-ink);
+  background:var(--cp-paper);
+  -webkit-font-smoothing:antialiased;
+  font-feature-settings:"ss01","cv11";
+  letter-spacing:-0.005em;
+}
+
+.cp .display{font-family:var(--font-display);font-weight:400;letter-spacing:0.005em;line-height:.92;text-transform:uppercase}
+.cp .mono{font-family:var(--font-mono);letter-spacing:-0.01em}
+.cp .eyebrow{font-family:var(--font-mono);font-size:11px;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--cp-mute)}
+.cp .num{font-family:var(--font-display);font-feature-settings:"tnum"}
+
+/* Brackets accent (echoes alternate lockup crop-marks) */
+.cp .bracket{position:relative;display:inline-block;padding:0 .55em}
+.cp .bracket::before,.cp .bracket::after{
+  content:"";position:absolute;top:0;bottom:0;width:.18em;
+  border-color:var(--cp-red);border-style:solid;border-width:0;
+}
+.cp .bracket::before{left:0;border-left-width:.18em;border-top-width:.18em;border-bottom-width:.18em;border-right:0}
+.cp .bracket::after{right:0;border-right-width:.18em;border-top-width:.18em;border-bottom-width:.18em;border-left:0}
+
+/* Diagonal "speed lines" tile (mirrors logo motion lines) */
+.cp .speed-bg{
+  background-image:
+    repeating-linear-gradient(115deg,
+      rgba(230,35,51,.0) 0 22px,
+      rgba(230,35,51,.0) 22px,
+      rgba(230,35,51,.55) 22px,
+      rgba(230,35,51,.55) 24px,
+      rgba(230,35,51,0) 24px 60px);
+}
+
+/* Buttons */
+.cp .btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:12px 18px;border-radius:999px;border:0;cursor:pointer;
+  font-weight:700;font-size:13px;letter-spacing:.02em;
+  transition:transform .12s, box-shadow .12s, background .12s, color .12s;
+  white-space:nowrap;
+}
+.cp .btn.primary{background:var(--cp-accent);color:#fff}
+.cp .btn.primary:hover{background:var(--cp-navy);transform:translateY(-1px)}
+.cp .btn.dark{background:var(--cp-navy);color:#fff}
+.cp .btn.dark:hover{background:var(--cp-navy-deep);transform:translateY(-1px)}
+.cp .btn.ghost{background:transparent;color:var(--cp-ink);border:1.5px solid var(--cp-line)}
+.cp .btn.ghost:hover{border-color:var(--cp-ink);background:#fff}
+.cp .btn.zest{background:var(--cp-zest);color:var(--cp-navy-deep);box-shadow:0 0 0 2px var(--cp-navy-deep) inset}
+.cp .btn.lg{padding:16px 26px;font-size:14px}
+.cp .btn.sm{padding:8px 12px;font-size:12px}
+
+/* Chips */
+.cp .chip{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:6px 12px;border-radius:999px;
+  border:1.2px solid var(--cp-line);background:#fff;
+  font-size:12px;font-weight:600;letter-spacing:.01em;
+  cursor:pointer;transition:all .12s;
+}
+.cp .chip.active{background:var(--cp-navy);color:#fff;border-color:var(--cp-navy)}
+.cp .chip:hover{border-color:var(--cp-ink)}
+.cp .chip .swatch{width:10px;height:10px;border-radius:50%;display:inline-block;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}
+
+/* Card */
+.cp .card{background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-card)}
+
+/* Live dot */
+.cp .live{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-mono);font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+.cp .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--cp-red);box-shadow:0 0 0 3px rgba(230,35,51,.18);animation:cp-pulse 1.6s ease-in-out infinite}
+@keyframes cp-pulse{0%,100%{box-shadow:0 0 0 3px rgba(230,35,51,.18)}50%{box-shadow:0 0 0 6px rgba(230,35,51,.05)}}
+
+/* Photo cell */
+.cp .photo{
+  position:relative;overflow:hidden;border-radius:6px;
+  background:#1f2738;
+  display:block;cursor:pointer;
+  transform:translateZ(0);
+}
+.cp .photo img{
+  width:100%;height:100%;display:block;object-fit:cover;
+  filter:saturate(1.05) contrast(1.04);
+  transition:transform .35s cubic-bezier(.2,.7,.2,1);
+}
+.cp .photo:hover img{transform:scale(1.04)}
+.cp .photo .bib{
+  position:absolute;top:8px;left:8px;
+  font-family:var(--font-display);font-size:18px;line-height:1;
+  background:#fff;color:var(--cp-ink);padding:5px 7px 4px;border-radius:4px;
+  letter-spacing:.02em;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);
+}
+.cp .photo .ts{
+  position:absolute;bottom:8px;left:8px;
+  font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.06em;
+  color:#fff;text-shadow:0 1px 2px rgba(0,0,0,.6);
+}
+.cp .photo .px{
+  position:absolute;bottom:8px;right:8px;
+  font-family:var(--font-mono);font-size:11px;font-weight:700;
+  background:rgba(255,255,255,.95);color:var(--cp-ink);
+  padding:3px 6px;border-radius:4px;
+}
+.cp .photo .heart{
+  position:absolute;top:8px;right:8px;
+  width:28px;height:28px;border-radius:999px;
+  background:rgba(255,255,255,.92);
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transform:translateY(-2px);transition:.18s;
+  border:0;cursor:pointer;color:var(--cp-navy);
+}
+.cp .photo:hover .heart{opacity:1;transform:translateY(0)}
+.cp .photo .heart.on{opacity:1;color:var(--cp-red)}
+
+/* Watermark overlay */
+.cp .photo .wm{
+  position:absolute;inset:0;pointer-events:none;
+  display:flex;align-items:center;justify-content:center;
+  overflow:hidden;
+}
+.cp .photo .wm::before{
+  content:"CP·SPORTFOTOGRAFIE  •  CP·SPORTFOTOGRAFIE  •  CP·SPORTFOTOGRAFIE  •  CP·SPORTFOTOGRAFIE  •  CP·SPORTFOTOGRAFIE  •  CP·SPORTFOTOGRAFIE  •  CP·SPORTFOTOGRAFIE  •  CP·SPORTFOTOGRAFIE";
+  font-family:var(--font-display);font-size:14px;letter-spacing:.16em;color:#fff;opacity:.55;
+  white-space:pre-wrap;text-align:center;line-height:2.2;
+  transform:rotate(-22deg) scale(1.5);
+  mix-blend-mode:overlay;
+  width:160%;
+}
+.cp .photo.no-wm .wm{display:none}
+
+/* Photo gradient bottom for text legibility */
+.cp .photo::after{
+  content:"";position:absolute;left:0;right:0;bottom:0;height:38%;
+  background:linear-gradient(to top,rgba(0,0,0,.55),transparent);
+  pointer-events:none;
+}
+
+/* Crop-mark border */
+.cp .crop{position:relative}
+.cp .crop::before,.cp .crop::after,.cp .crop > .crop-tr,.cp .crop > .crop-br{
+  content:"";position:absolute;width:18px;height:18px;border-color:var(--cp-red);border-style:solid;border-width:0;
+}
+.cp .crop::before{top:-6px;left:-6px;border-top-width:3px;border-left-width:3px}
+.cp .crop::after{bottom:-6px;left:-6px;border-bottom-width:3px;border-left-width:3px}
+.cp .crop > .crop-tr{top:-6px;right:-6px;border-top-width:3px;border-right-width:3px;display:block}
+.cp .crop > .crop-br{bottom:-6px;right:-6px;border-bottom-width:3px;border-right-width:3px;display:block}
+
+/* Form fields */
+.cp .field{
+  display:flex;align-items:center;gap:10px;
+  background:#fff;border-radius:999px;
+  padding:6px 6px 6px 18px;border:1.5px solid var(--cp-line);
+  transition:border-color .12s;
+}
+.cp .field:focus-within{border-color:var(--cp-navy)}
+.cp .field input{
+  border:0;outline:0;background:transparent;font:600 14px var(--font-body);
+  color:var(--cp-ink);min-width:0;flex:1;letter-spacing:.01em;
+}
+.cp .field input::placeholder{color:var(--cp-mute);font-weight:500}
+.cp .field .pre{font:600 12px var(--font-mono);letter-spacing:.1em;color:var(--cp-mute);text-transform:uppercase}
+.cp .field.lg{padding:8px 8px 8px 22px}
+.cp .field.lg input{font-size:16px}
+.cp .field.bib input{font-family:var(--font-display);font-size:22px;letter-spacing:.04em}
+.cp .field.bib.lg input{font-size:28px}
+
+/* Divider with red tick like alternate lockup */
+.cp .tick{
+  display:inline-block;width:36px;height:3px;background:var(--cp-red);
+}
+
+/* Nav */
+.cp .nav{
+  display:flex;align-items:center;gap:24px;
+  padding:18px 32px;background:#fff;border-bottom:1px solid var(--cp-line);
+}
+.cp .nav .logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:inherit}
+.cp .nav .links{display:flex;gap:24px;font-size:13.5px;font-weight:600;color:var(--cp-ink);letter-spacing:.01em}
+.cp .nav .links a{color:inherit;text-decoration:none;cursor:pointer}
+.cp .nav .links a:hover{color:var(--cp-red)}
+.cp .nav .links a.active{color:var(--cp-red)}
+
+/* Scrollbar inside artboards already hidden by DC */
+
+/* Layouts */
+.cp .stack{display:flex;flex-direction:column}
+.cp .row{display:flex}
+.cp .grow{flex:1}
+.cp .center{display:flex;align-items:center;justify-content:center}
+
+/* Footer */
+.cp .footer{
+  background:var(--cp-navy-deep);color:#cfd6e5;
+  padding:48px 48px 24px;
+  font-size:13px;
+}
+.cp .footer h4{color:#fff;font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin:0 0 12px;font-family:var(--font-mono);font-weight:600}
+.cp .footer a{color:#cfd6e5;text-decoration:none;display:block;padding:4px 0}
+.cp .footer a:hover{color:#fff}
+
+/* iPhone-ish frame */
+.cp .phone{
+  width:390px;height:844px;
+  background:#0a0a10;border-radius:46px;
+  padding:10px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.08) inset, 0 18px 60px -20px rgba(10,21,48,.5);
+  position:relative;
+}
+.cp .phone .screen{
+  width:100%;height:100%;border-radius:38px;overflow:hidden;
+  background:var(--cp-paper);position:relative;
+}
+.cp .phone .notch{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  width:108px;height:32px;border-radius:999px;background:#0a0a10;z-index:10;
+}
+.cp .phone .status{
+  position:absolute;top:0;left:0;right:0;height:46px;z-index:5;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 32px 0;font:600 14px var(--font-body);color:var(--cp-ink);
+}
